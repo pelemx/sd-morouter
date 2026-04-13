@@ -17,9 +17,9 @@ def verify_auth(request: Request):
     if key != API_KEY:
         raise HTTPException(status_code=403, detail="Forbidden: Invalid API Key")
 
-def sharx_compute_api(demo: gr.Blocks, app: FastAPI):
+def runpd_compute_api(demo: gr.Blocks, app: FastAPI):
     
-    @app.post("/sharx/v1/pip")
+    @app.post("/runpd/v1/pip")
     async def install_package(request: Request):
         verify_auth(request)
         payload = await request.json()
