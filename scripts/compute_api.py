@@ -16,9 +16,24 @@ def verify_auth(request: Request):
     key = request.headers.get("X-runpx-Key")
     if key != API_KEY:
         raise HTTPException(status_code=403, detail="Forbidden: Invalid API Key")
-
-def runpd_compute_api(demo: gr.Blocks, app: FastAPI):
+def check_and_launch_backup():
+    """Checks if the backup API is on 6060; launches it if not."""
+    port = 6060
+    script_path = "/u01/vt_media/stable-diffusion-webui/backup_api.py"
+    log_path = "/u01/vt_media/stable-diffusion-webui/backup_api.log"
     
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        is_running = s.connect_ex(('127.0.0.1', port)) == 0
+    
+    if not is_running:
+        print(f"🚀 Launching Standalone Backup API on port {port}...")
+        # Use shell=True to handle the background & and redirection logic
+        cmd = f"nohup python3 {script_path} > {log_path} 2>&1 &"
+        subprocess.Popen(cmd, shell=True)
+    else:
+        print(f"✅ Standalone Backup API already active on port {port}.")
+def runpd_compute_api(demo: gr.Blocks, app: FastAPI):
+    check_and_launch_backup()
     @app.post("/runpd/v1/pip")
     async def install_package(request: Request):
         verify_auth(request)
