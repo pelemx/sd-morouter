@@ -19,9 +19,8 @@ def verify_auth(request: Request):
 def check_and_launch_backup():
     """Checks if the backup API is on 6060; launches it if not."""
     port = 6060
-    script_path = "/u01/vt_media/stable-diffusion-webui/backup_api.py"
-    log_path = "/u01/vt_media/stable-diffusion-webui/backup_api.log"
-    
+    script_path = "/u01/vt_media/stable-diffusion-webui/standalone_api.py"
+  
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         is_running = s.connect_ex(('127.0.0.1', port)) == 0
     
