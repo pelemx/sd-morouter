@@ -20,18 +20,31 @@ def verify_auth(request: Request):
 def check_and_launch_backup():
     """Checks if the backup API is on 6060; launches it if not."""
     port = 6060
-    script_path = "/u01/vt_media/stable-diffusion-webui/standalone_api.py"
-    log_path = "/u01/vt_media/stable-diffusion-webui/standalone_api.log"
+    
+    # 1. GET THE EXACT FOLDER WHERE THIS SCRIPT (compute_api.py) LIVES
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # 2. BUILD THE PATHS DYNAMICALLY
+    script_path = os.path.join(current_dir, "standalone_api.py")
+    log_path = os.path.join(current_dir, "standalone_api.log")
+    
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         is_running = s.connect_ex(('127.0.0.1', port)) == 0
     
     if not is_running:
         print(f"🚀 Launching Standalone Backup API on port {port}...")
+        
+        # Double-check that the file actually exists before trying to run it
+        if not os.path.exists(script_path):
+            print(f"🔴 ERROR: Could not find standalone_api.py at {script_path}")
+            return
+            
         # Use shell=True to handle the background & and redirection logic
         cmd = f"nohup python3 {script_path} > {log_path} 2>&1 &"
         subprocess.Popen(cmd, shell=True)
     else:
         print(f"✅ Standalone Backup API already active on port {port}.")
+        
 def runpd_compute_api(demo: gr.Blocks, app: FastAPI):
     check_and_launch_backup()
     @app.post("/runpd/v1/pip")
