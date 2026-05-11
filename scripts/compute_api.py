@@ -4,6 +4,7 @@ import io
 import contextlib
 import subprocess
 import traceback
+import socket
 import shutil
 import gradio as gr
 from fastapi import FastAPI, Request, HTTPException, UploadFile, File, Form
